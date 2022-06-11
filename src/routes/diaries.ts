@@ -2,6 +2,11 @@ import express from 'express'
 import * as diaryServices from '../services/diariesService'
 import toNewDiaryEntry from '../utils'
 
+const getErrorMessage = (error: unknown): String => {
+  if (error instanceof Error) return error.message
+  return String(error)
+}
+
 const router = express.Router()
 
 router.get('/', (_req, res) => {
@@ -17,11 +22,15 @@ router.get('/:id', (req, res) => {
 })
 
 router.post('/', (req, res) => {
-  const newDiaryEntry = toNewDiaryEntry(req.body)
+  try {
+    const newDiaryEntry = toNewDiaryEntry(req.body)
 
-  const addedDiaryEntry = diaryServices.addDiary(newDiaryEntry)
+    const addedDiaryEntry = diaryServices.addDiary(newDiaryEntry)
 
-  res.send(addedDiaryEntry)
+    res.send(addedDiaryEntry)
+  } catch (error) {
+    res.status(400).send(getErrorMessage(error))
+  }
 })
 
 export default router
